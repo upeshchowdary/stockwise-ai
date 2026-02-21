@@ -1,0 +1,22 @@
+{
+  "name": "stockwise-backend",
+  "version": "1.0.0",
+  "description": "MySQL Backend for Stockwise AI",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "mysql2": "^3.11.0",
+    "node-fetch": "^3.3.2",
+    "vite_react_shadcn_ts": "file:.."
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}

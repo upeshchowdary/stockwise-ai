@@ -1,0 +1,146 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+
+    --card: 240 10% 4.9%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 142 70% 45%;
+    --primary-foreground: 144 100% 5%;
+
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+
+    --accent: 38 92% 50%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 142 70% 45%;
+
+    --radius: 0.5rem;
+
+    --chart-green: 142 70% 45%;
+    --chart-red: 0 72% 51%;
+    --chart-blue: 210 100% 50%;
+    --chart-yellow: 38 92% 50%;
+    --chart-purple: 270 60% 55%;
+
+    --sidebar-background: 240 10% 4.9%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 142 70% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 142 70% 45%;
+  }
+
+  .light {
+    --background: 0 0% 100%;
+    --foreground: 220 15% 15%;
+
+    --card: 0 0% 99%;
+    --card-foreground: 220 15% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 15% 15%;
+
+    --primary: 142 70% 40%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 15% 30%;
+
+    --muted: 220 14% 96%;
+    --muted-foreground: 215 15% 45%;
+
+    --accent: 38 92% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 90%;
+    --input: 220 13% 90%;
+    --ring: 142 70% 40%;
+
+    --chart-green: 142 70% 40%;
+    --chart-red: 0 72% 51%;
+    --chart-blue: 210 100% 50%;
+    --chart-yellow: 38 92% 50%;
+    --chart-purple: 270 60% 55%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 220 15% 30%;
+    --sidebar-primary: 142 70% 40%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 14% 96%;
+    --sidebar-accent-foreground: 220 15% 30%;
+    --sidebar-border: 220 13% 90%;
+    --sidebar-ring: 142 70% 40%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}
+
+@layer utilities {
+  .font-mono-data {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .text-buy {
+    color: hsl(var(--chart-green));
+  }
+
+  .text-sell {
+    color: hsl(var(--chart-red));
+  }
+
+  .text-hold {
+    color: hsl(var(--chart-yellow));
+  }
+
+  .bg-buy {
+    background-color: hsl(var(--chart-green) / 0.15);
+  }
+
+  .bg-sell {
+    background-color: hsl(var(--chart-red) / 0.15);
+  }
+
+  .bg-hold {
+    background-color: hsl(var(--chart-yellow) / 0.15);
+  }
+
+  .glow-green {
+    box-shadow: 0 0 20px hsl(var(--chart-green) / 0.3);
+  }
+
+  .glow-red {
+    box-shadow: 0 0 20px hsl(var(--chart-red) / 0.3);
+  }
+}
