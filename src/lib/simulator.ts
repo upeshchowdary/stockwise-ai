@@ -42,7 +42,7 @@ export function simulateStockData(symbol: string): StockQuoteResponse {
         data: enriched,
         source: "offline" as const,
         currentPrice: enriched[enriched.length - 1].close,
-        name: symbol.split('.')[0] + " (Simulated)",
+        name: symbol.split('.')[0],
         hourSeed: Math.floor(Date.now() / 3600000)
     };
 }

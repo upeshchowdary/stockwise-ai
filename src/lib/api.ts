@@ -50,11 +50,29 @@ export async function searchStocks(query: string): Promise<StockSearchResult[]> 
     const data = await response.json();
     return data?.results || [];
   } catch (e) {
-    return simulateSearchResults(query);
+    // Fallback 1: Direct Yahoo Search via AllOrigins (CORS Proxy)
+    try {
+      const yahooUrl = `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=15&newsCount=0&listsCount=0`;
+      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`;
+      const res = await fetch(proxyUrl);
+      const json = await res.json();
+      const data = JSON.parse(json.contents);
+      return (data.quotes || [])
+        .filter((q: any) => q.quoteType === 'EQUITY' || q.quoteType === 'ETF')
+        .map((q: any) => ({
+          symbol: q.symbol,
+          name: q.shortname || q.longname || q.symbol,
+          exchange: q.exchDisp || q.exchange,
+          type: q.quoteType,
+        }));
+    } catch (err) {
+      return simulateSearchResults(query);
+    }
   }
 }
 
 export async function getStockQuote(symbol: string, range = "6mo"): Promise<StockQuoteResponse> {
+  // Step 1: Try Primary Backend
   try {
     const response = await fetch(`${API_URL}/stock-quote`, {
       method: 'POST',
@@ -63,16 +81,53 @@ export async function getStockQuote(symbol: string, range = "6mo"): Promise<Stoc
     });
     if (!response.ok) throw new Error();
     const data = await response.json();
-
-    // Ensure data is enriched with signals even if backend didn't do it
     if (data.success && data.data) {
       data.data = enrichWithAiSignals(data.data, symbol);
     }
-
     return data;
   } catch (e) {
-    console.warn(`Backend unreachable at ${API_URL}, falling back to simulator for ${symbol}`);
-    return simulateStockData(symbol);
+    console.warn(`Backend unreachable, trying CORS proxy fallback for ${symbol}`);
+
+    // Step 2: Try Direct Yahoo via AllOrigins (CORS Proxy)
+    try {
+      const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=${range}&interval=1d&includePrePost=false`;
+      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`;
+      const res = await fetch(proxyUrl);
+      const json = await res.json();
+      const chartData = JSON.parse(json.contents);
+      const chart = chartData?.chart?.result?.[0];
+
+      if (!chart) throw new Error('No data via proxy');
+
+      const timestamps = chart.timestamp || [];
+      const q = chart.indicators.quote[0];
+      const meta = chart.meta;
+
+      const rawData = timestamps.map((t: number, i: number) => ({
+        date: new Date(t * 1000).toISOString().split('T')[0],
+        open: +(q.open[i] || 0).toFixed(2),
+        high: +(q.high[i] || 0).toFixed(2),
+        low: +(q.low[i] || 0).toFixed(2),
+        close: +(q.close[i] || 0).toFixed(2),
+        volume: q.volume[i] || 0,
+      })).filter((d: any) => d.close > 0);
+
+      const currentPrice = meta.regularMarketPrice || rawData[rawData.length - 1]?.close || 0;
+      const enriched = enrichWithAiSignals(rawData, symbol);
+
+      return {
+        success: true,
+        data: enriched,
+        name: meta.longName || meta.shortName || symbol,
+        currentPrice: +currentPrice.toFixed(2),
+        source: "online",
+        hourSeed: Math.floor(Date.now() / 3600000)
+      };
+    } catch (err) {
+      console.warn(`CORS proxy failed, falling back to simulator for ${symbol}`);
+      // Step 3: Absolute Last Resort - Simulator
+      return simulateStockData(symbol);
+    }
   }
 }
 
