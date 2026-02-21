@@ -34,30 +34,46 @@ export interface StockQuoteResponse {
   hourSeed?: number;
 }
 
+import { simulateStockData, simulateSearchResults } from "./simulator";
+import { enrichWithAiSignals } from "./predictions";
+
 const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001/api');
 
 export async function searchStocks(query: string): Promise<StockSearchResult[]> {
-  const response = await fetch(`${API_URL}/stock-search`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query })
-  });
-  if (!response.ok) throw new Error('Failed to search stocks');
-  const data = await response.json();
-  return data?.results || [];
+  try {
+    const response = await fetch(`${API_URL}/stock-search`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query })
+    });
+    if (!response.ok) throw new Error();
+    const data = await response.json();
+    return data?.results || [];
+  } catch (e) {
+    return simulateSearchResults(query);
+  }
 }
 
 export async function getStockQuote(symbol: string, range = "6mo"): Promise<StockQuoteResponse> {
-  const response = await fetch(`${API_URL}/stock-quote`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ symbol, range })
-  });
-  if (!response.ok) {
-    const errorBody = await response.json().catch(() => ({}));
-    throw new Error(errorBody.error || 'Failed to fetch stock quote');
+  try {
+    const response = await fetch(`${API_URL}/stock-quote`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ symbol, range })
+    });
+    if (!response.ok) throw new Error();
+    const data = await response.json();
+
+    // Ensure data is enriched with signals even if backend didn't do it
+    if (data.success && data.data) {
+      data.data = enrichWithAiSignals(data.data, symbol);
+    }
+
+    return data;
+  } catch (e) {
+    console.warn(`Backend unreachable at ${API_URL}, falling back to simulator for ${symbol}`);
+    return simulateStockData(symbol);
   }
-  return await response.json();
 }
 
 export async function getWallet() {
